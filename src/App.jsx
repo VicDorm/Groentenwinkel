@@ -5,7 +5,6 @@ import Winkelkar from "./components/Winkelkar";
 import EuroDollarToggle from "./components/EuroDollarToggle";
 import { getExchangeRate } from "./services/EuroDollarService";
 import "bootstrap/dist/css/bootstrap.min.css";
-import axios from "axios";
 
 const App = () => {
   const [selectedGroenten, setSelectedGroenten] = useState("");
@@ -14,46 +13,61 @@ const App = () => {
   const [winkelkar, setWinkelkar] = useState([]);
   const [currency, setCurrency] = useState("EUR");
   const [exchangeRate, setExchangeRate] = useState(1);
+  const [isInvalid, setIsInvalid] = useState(false);
 
   const handleBestel = () => {
-    if (!selectedGroenten || isNaN(selectedGroenten.prijs)) {
-      console.error("Geen geldige groente geselecteerd.");
+    if (!selectedGroenten || isNaN(selectedGroenten.prijs) || aantal <= 0) {
+      console.error("Geen geldige groente of aantal geselecteerd.");
       return;
     }
-
+  
     const newItem = {
       groenten: selectedGroenten.naam,
-      aantal: aantal,
+      aantal: parseFloat(aantal), // 🚨 Zorg dat het hier een getal is
       prijs: selectedGroenten.prijs,
       winkel: selectedWinkel
     };
-
-    setWinkelkar([...winkelkar, newItem]);
-
+  
     const existingItemIndex = winkelkar.findIndex(
-      item =>
-        item.groenten === newItem.groenten && item.winkel === selectedWinkel
+      item => item.groenten === newItem.groenten && item.winkel === selectedWinkel
     );
-
+  
+    let updatedWinkelkar = [...winkelkar];
+  
     if (existingItemIndex !== -1) {
-      const updatedWinkelkar = [...winkelkar];
-      updatedWinkelkar[existingItemIndex].aantal += newItem.aantal;
-      setWinkelkar(updatedWinkelkar);
+      updatedWinkelkar[existingItemIndex].aantal += newItem.aantal; // ✅ Correcte optelling
     } else {
-      setWinkelkar([...winkelkar, { ...newItem, winkel: selectedWinkel }]);
+      updatedWinkelkar.push(newItem);
     }
+  
+    console.log("Updated winkelkar:", updatedWinkelkar); // 🐛 Debug output
+  
+    setWinkelkar(updatedWinkelkar);
+    setAantal(0);
   };
+   
 
   const handleEuroDollarToggle = async () => {
     const newCurrency = currency === 'EUR' ? 'USD' : 'EUR';
     setCurrency(newCurrency);
 
-    // Alleen een nieuwe wisselkoers ophalen als we naar USD schakelen
     if (newCurrency === 'USD') {
       const rate = await getExchangeRate('EUR', 'USD');
       setExchangeRate(rate);
     } else {
       setExchangeRate(1);
+    }
+  };
+  
+  const handleAantalChange = (e) => {
+    const value = e.target.value;
+    const floatValue = parseFloat(value);
+  
+    if (value === "" || floatValue >= 0) {
+      setAantal(floatValue || 0); // 🚀 Altijd als getal opslaan
+      const isDecimal = floatValue % 1 !== 0;
+      const isKg = selectedGroenten?.eenheid === "kg";
+      setIsInvalid(isDecimal && !isKg);
     }
   };
 
@@ -79,7 +93,10 @@ const App = () => {
           <label className="form-label mb-0">Kies een groente:</label>
         </div>
         <div className="col-9">
-          <GroentenSelect onSelect={setSelectedGroenten} />
+          <GroentenSelect onSelect={(groente) => {
+            setSelectedGroenten(groente);
+            setAantal(0);
+          }} />
         </div>
       </div>
 
@@ -90,34 +107,29 @@ const App = () => {
         <div className="col-9 position-relative">
           <input
             type="number"
-            className="form-control"
+            className={`form-control ${isInvalid ? 'is-invalid' : ''}`}
             value={aantal}
-            onChange={e => {
-              const value = parseFloat(e.target.value);
-              if (value >= 0 || e.target.value === "") {
-                setAantal(value);
-              }
-            }}
+            onChange={handleAantalChange}
             placeholder="Aantal"
             min="0"
-            step="1"
+            step="any"
           />
-          {aantal % 1 !== 0 &&
-            <small
-              className="text-danger position-absolute"
-              style={{ top: "100%", left: 0 }}
-            >
-              Enkel bij /kg aub.
-            </small>}
+          {isInvalid && (
+            <small className="text-danger position-absolute" style={{ top: "100%", left: 0 }}>
+              Decimalen zijn enkel toegelaten bij kg aub.
+            </small>
+          )}
         </div>
       </div>
+
       <button
         className="btn btn-primary"
         onClick={handleBestel}
-        disabled={!selectedWinkel || !selectedGroenten || aantal <= 0}
+        disabled={!selectedWinkel || !selectedGroenten || aantal <= 0 || isInvalid}
       >
         Bestel
       </button>
+
       <EuroDollarToggle currency={currency} onToggle={handleEuroDollarToggle} />
       <Winkelkar
         items={winkelkar}

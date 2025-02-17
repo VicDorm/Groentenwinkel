@@ -12,8 +12,13 @@ const WinkelSelect = ({ onSelect }) => {
     <select onChange={(e) => onSelect(e.target.value)}>
       <option value="">Selecteer een winkel</option>
       {winkels.map((winkel, index) => (
-        <option key={index} value={winkel.naam} title={`${winkel.adres}, ${winkel.post} ${winkel.gemeente}`}>
-          {winkel.naam}
+        <option 
+        key={index} 
+        value={winkel.naam} 
+        title={`${winkel.adres}, 
+        ${winkel.post} 
+        ${winkel.gemeente}`}>
+        {winkel.naam}
         </option>
       ))}
     </select>
