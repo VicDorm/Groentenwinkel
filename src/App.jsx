@@ -23,7 +23,7 @@ const App = () => {
   
     const newItem = {
       groenten: selectedGroenten.naam,
-      aantal: parseFloat(aantal), // 🚨 Zorg dat het hier een getal is
+      aantal: parseFloat(aantal), 
       prijs: selectedGroenten.prijs,
       winkel: selectedWinkel
     };
@@ -35,12 +35,12 @@ const App = () => {
     let updatedWinkelkar = [...winkelkar];
   
     if (existingItemIndex !== -1) {
-      updatedWinkelkar[existingItemIndex].aantal += newItem.aantal; // ✅ Correcte optelling
+      updatedWinkelkar[existingItemIndex].aantal += newItem.aantal;
     } else {
       updatedWinkelkar.push(newItem);
     }
   
-    console.log("Updated winkelkar:", updatedWinkelkar); // 🐛 Debug output
+    console.log("Updated winkelkar:", updatedWinkelkar); 
   
     setWinkelkar(updatedWinkelkar);
     setAantal(0);
@@ -64,7 +64,7 @@ const App = () => {
     const floatValue = parseFloat(value);
   
     if (value === "" || floatValue >= 0) {
-      setAantal(floatValue || 0); // 🚀 Altijd als getal opslaan
+      setAantal(floatValue || 0);
       const isDecimal = floatValue % 1 !== 0;
       const isKg = selectedGroenten?.eenheid === "kg";
       setIsInvalid(isDecimal && !isKg);
