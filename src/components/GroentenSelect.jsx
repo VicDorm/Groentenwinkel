@@ -9,7 +9,10 @@ const GroentenSelect = ({ onSelect }) => {
   }, []);
 
   return (
-    <select onChange={(e) => onSelect(e.target.value)}>
+    <select onChange={(e) => {
+      const selected = groenten.find(g => g.naam === e.target.value);
+      onSelect(selected);
+    }}>
       <option value="">Selecteer een groente</option>
       {groenten.map((groente, index) => (
         <option key={index} value={groente.naam}>

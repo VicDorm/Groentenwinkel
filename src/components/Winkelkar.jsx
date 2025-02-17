@@ -6,16 +6,37 @@ const Winkelkar = ({ items, currency, exchangeRate }) => {
   return (
     <div>
       <h3>Winkelkar</h3>
-      <ul>
-        {items.map((item, index) => (
-          <li key={index}>
-            {item.groente} - {item.aantal} x {item.prijs} {currency} = {(item.aantal * item.prijs * exchangeRate).toFixed(2)} {currency}
-          </li>
-        ))}
-      </ul>
-      <h4>Totaal: {(calculateTotal() * exchangeRate).toFixed(2)} {currency}</h4>
+      <table className="table table-striped">
+        <thead>
+          <tr>
+            <th>Winkel</th>
+            <th>Groente</th>
+            <th>Aantal</th>
+            <th>Prijs ({currency})</th>
+            <th>Subtotaal ({currency})</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, index) => (
+            <tr key={index}>
+              <td>{item.winkel}</td>
+              <td>{item.groenten}</td>
+              <td>{item.aantal}</td>
+              <td>{(item.prijs * exchangeRate).toFixed(2)}</td>
+              <td>{(item.aantal * item.prijs * exchangeRate).toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan="3"><strong>Totaal:</strong></td>
+            <td><strong>{(calculateTotal() * exchangeRate).toFixed(2)} {currency}</strong></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   );
 };
 
-export default Winkelkar; // Ensure this is present
+export default Winkelkar;
